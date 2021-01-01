@@ -980,6 +980,7 @@ Theorem count_member_nonzero : forall (s : bag),
 Proof.
   intros.
   simpl.
+
 Qed.
 (** [] *)
 
