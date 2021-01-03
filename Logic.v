@@ -148,7 +148,13 @@ Qed.
 Example and_exercise :
   forall n m : nat, n + m = 0 -> n = 0 /\ m = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct n.
+  - destruct m.
+    + split. reflexivity. reflexivity.
+    + discriminate H.
+  - discriminate H.
+Qed.
 (** [] *)
 
 (** So much for proving conjunctive statements.  To go in the other
@@ -226,7 +232,10 @@ Proof.
 Lemma proj2 : forall P Q : Prop,
   P /\ Q -> Q.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct H.
+  apply H0.
+Qed.
 (** [] *)
 
 (** Finally, we sometimes need to rearrange the order of conjunctions
@@ -253,7 +262,10 @@ Theorem and_assoc : forall P Q R : Prop,
   P /\ (Q /\ R) -> (P /\ Q) /\ R.
 Proof.
   intros P Q R [HP [HQ HR]].
-  (* FILL IN HERE *) Admitted.
+  split.
+  - split. apply HP. apply HQ.
+  - apply HR.
+Qed.
 (** [] *)
 
 (** By the way, the infix notation [/\] is actually just syntactic
@@ -317,14 +329,24 @@ Qed.
 Lemma mult_eq_0 :
   forall n m, n * m = 0 -> n = 0 \/ m = 0.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct n.
+  - left. reflexivity.
+  - destruct m.
+    + right. reflexivity.
+    + discriminate H.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, standard (or_commut)  *)
 Theorem or_commut : forall P Q : Prop,
   P \/ Q  -> Q \/ P.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct H.
+  - right. apply H.
+  - left. apply H.
+Qed.
 (** [] *)
 
 (* ================================================================= *)
@@ -380,7 +402,10 @@ Proof.
 Fact not_implies_our_not : forall (P:Prop),
   ~ P -> (forall (Q:Prop), P -> Q).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  apply H in H0.
+  destruct H0.
+Qed.
 (** [] *)
 
 (** Inequality is a frequent enough example of negated statement
@@ -449,14 +474,24 @@ Definition manual_grade_for_double_neg_inf : option (nat*string) := None.
 Theorem contrapositive : forall (P Q : Prop),
   (P -> Q) -> (~Q -> ~P).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold not.
+  intros.
+  apply H0.
+  apply H.
+  apply H1.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, standard (not_both_true_and_false)  *)
 Theorem not_both_true_and_false : forall P : Prop,
   ~ (P /\ ~P).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold not.
+  intros.
+  destruct H.
+  apply H0.
+  apply H.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, advanced (informal_not_PNP) 
@@ -568,19 +603,38 @@ Qed.
 Theorem iff_refl : forall P : Prop,
   P <-> P.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  - intros. apply H.
+  - intros. apply H.
+Qed.
 
 Theorem iff_trans : forall P Q R : Prop,
   (P <-> Q) -> (Q <-> R) -> (P <-> R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros P Q R [PQ QP] [QR RQ].
+  split.
+  - intros. apply QR. apply PQ. apply H.
+  - intros. apply QP. apply RQ. apply H.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard (or_distributes_over_and)  *)
 Theorem or_distributes_over_and : forall P Q R : Prop,
   P \/ (Q /\ R) <-> (P \/ Q) /\ (P \/ R).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  - intros. destruct H.
+    + split. left. apply H. left. apply H.
+    + destruct H. split. right. apply H. right. apply H0.
+  - intros. destruct H. destruct H. destruct H0.
+    + left. apply H.
+    + left. apply H.
+    + destruct H0.
+      * left. apply H0.
+      * right. split. apply H. apply H0. 
+Qed.
 (** [] *)
 
 (* ================================================================= *)
@@ -700,7 +754,11 @@ Proof.
 Theorem dist_not_exists : forall (X:Type) (P : X -> Prop),
   (forall x, P x) -> ~ (exists x, ~ P x).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  unfold not.
+  intros X P A [x NP].
+  apply NP.
+  apply A.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, standard (dist_exists_or) 
@@ -711,7 +769,15 @@ Proof.
 Theorem dist_exists_or : forall (X:Type) (P Q : X -> Prop),
   (exists x, P x \/ Q x) <-> (exists x, P x) \/ (exists x, Q x).
 Proof.
-   (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  - intros. destruct H. destruct H.
+    + left. exists x. apply H.
+    +  right. exists x. apply H.
+  - intros. destruct H. destruct H.
+    + exists x. left. apply H.
+    + destruct H. exists x. right. apply H.
+Qed.
 (** [] *)
 
 (* ################################################################# *)
@@ -796,7 +862,14 @@ Theorem In_map_iff :
     exists x, f x = y /\ In x l.
 Proof.
   intros A B f l y. split.
-  (* FILL IN HERE *) Admitted.
+  induction l.
+  - simpl. intros [].
+  - simpl. intros. destruct H.
+    + exists x. split. apply H. left. reflexivity.
+    + apply IHl in H.  destruct H. destruct H. exists x0. split.
+      apply H. right. apply H0.
+  - intros. destruct H. destruct H. rewrite <- H. apply In_map. apply H0.
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, standard (In_app_iff)  *)
@@ -804,7 +877,22 @@ Theorem In_app_iff : forall A l l' (a:A),
   In a (l++l') <-> In a l \/ In a l'.
 Proof.
   intros A l. induction l as [|a' l' IH].
-  (* FILL IN HERE *) Admitted.
+  - split.
+    + intros. simpl in H. right. apply H.
+    + intros. destruct H.
+      * inversion H.
+      * simpl. apply H.
+  - split.
+    + simpl. intros. destruct H.
+      * left. left. apply H.
+      * apply IH in H. destruct H.
+        left. right. apply H.
+        right. apply H.
+    + simpl. intros. destruct H. destruct H.
+      * left. apply H.
+      * right. apply IH. left. apply H.
+      * right. apply IH. right. apply H.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard, especially useful (All) 
@@ -819,15 +907,29 @@ Proof.
     lemma below.  (Of course, your definition should _not_ just
     restate the left-hand side of [All_In].) *)
 
-Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Fixpoint All {T : Type} (P : T -> Prop) (l : list T) : Prop :=
+  match l with
+  | [] => True
+  | x' :: l' => P x' /\ All P l'
+  end.
 
 Theorem All_In :
   forall T (P : T -> Prop) (l : list T),
     (forall x, In x l -> P x) <->
     All P l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros. split.
+  - induction l.
+    + reflexivity.
+    + intros. simpl. split.
+      * apply H. simpl. left. reflexivity.
+      * apply IHl. intros. apply H. simpl. right. apply H0.
+  - induction l.
+    + intros. inversion H0.
+    + intros. simpl in H0. simpl in H. destruct H. destruct H0.
+      * rewrite <- H0. apply H.
+      * apply IHl. apply H1. apply H0. 
+Qed.
 (** [] *)
 
 (** **** Exercise: 2 stars, standard, optional (combine_odd_even) 
@@ -838,8 +940,12 @@ Proof.
     equivalent to [Podd n] when [n] is odd and equivalent to [Peven n]
     otherwise. *)
 
-Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+Definition combine_odd_even (Podd Peven : nat -> Prop) : nat -> Prop:=
+  fun n =>
+    match oddb n with
+    | true => Podd n
+    | false => Peven n
+    end.
 
 (** To test your definition, prove the following facts: *)
 
@@ -849,7 +955,11 @@ Theorem combine_odd_even_intro :
     (oddb n = false -> Peven n) ->
     combine_odd_even Podd Peven n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  destruct (oddb n) eqn:Hn.
+  - unfold combine_odd_even. rewrite Hn. apply H. reflexivity.
+  - unfold combine_odd_even. rewrite Hn. apply H0. reflexivity.
+Qed.
 
 Theorem combine_odd_even_elim_odd :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -857,7 +967,10 @@ Theorem combine_odd_even_elim_odd :
     oddb n = true ->
     Podd n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold combine_odd_even in H.
+  rewrite H0 in H. apply H.
+Qed.
 
 Theorem combine_odd_even_elim_even :
   forall (Podd Peven : nat -> Prop) (n : nat),
@@ -865,7 +978,10 @@ Theorem combine_odd_even_elim_even :
     oddb n = false ->
     Peven n.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold combine_odd_even in H.
+  rewrite H0 in H. apply H.
+Qed.
 
 (** [] *)
 
@@ -1178,7 +1294,19 @@ Definition tr_rev {X} (l : list X) : list X :=
 
 Theorem tr_rev_correct : forall X, @tr_rev X = @rev X.
 Proof.
-(* FILL IN HERE *) Admitted.
+  intros. apply functional_extensionality.
+  intros. unfold tr_rev.
+  induction x as [|h t].
+  - reflexivity.
+  - simpl. rewrite <- IHt.
+    assert ( H: forall T l1 l2, @rev_append T l1 l2 = @rev_append T l1 [] ++ l2).
+    { intros T. induction l1 as [|h' t'].
+      - reflexivity.
+      - simpl. rewrite IHt'. intros. 
+        rewrite (IHt' (h'::l2)).
+        rewrite <- app_assoc. reflexivity. }
+    apply H.
+Qed.
 (** [] *)
 
 (* ================================================================= *)
@@ -1215,8 +1343,13 @@ Qed.
 Lemma evenb_double_conv : forall n, exists k,
   n = if evenb n then double k else S (double k).
 Proof.
-  (* Hint: Use the [evenb_S] lemma from [Induction.v]. *)
-  (* FILL IN HERE *) Admitted.
+  intros.
+  induction n.
+  - simpl. exists 0. simpl. reflexivity.
+  - rewrite evenb_S. destruct IHn. destruct (evenb n).
+    + simpl. exists x. rewrite H. reflexivity.
+    + simpl. exists (S x). rewrite H. reflexivity.
+Qed.
 (** [] *)
 
 (** Now the main theorem: *)
@@ -1380,12 +1513,35 @@ Qed.
 Theorem andb_true_iff : forall b1 b2:bool,
   b1 && b2 = true <-> b1 = true /\ b2 = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  - destruct b1.
+    + simpl. intros. split. reflexivity. apply H.
+    + simpl. intros. inversion H.
+  - intros. destruct H. rewrite H. rewrite H0. simpl. reflexivity. 
+Qed.
+
+Theorem orb_true_iff1 : forall x y,
+  x || y = y || x.
+Proof.
+  intros.
+  destruct x.
+  - destruct y. reflexivity. reflexivity.
+  - destruct y. reflexivity. reflexivity.
+Qed.
 
 Theorem orb_true_iff : forall b1 b2,
   b1 || b2 = true <-> b1 = true \/ b2 = true.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  - destruct b1.
+    + simpl. intros. left. reflexivity.
+    + simpl. intros. right. apply H. 
+  - intros. destruct H.
+    + rewrite H. reflexivity.
+    + rewrite H. rewrite orb_true_iff1. reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 1 star, standard (eqb_neq) 
@@ -1397,7 +1553,13 @@ Proof.
 Theorem eqb_neq : forall x y : nat,
   x =? y = false <-> x <> y.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  split.
+  - unfold not. intros. rewrite H0 in H. rewrite <- eqb_refl in H. inversion H.
+  - unfold not. intros. destruct (x =? y) eqn: Hxy.
+    + rewrite eqb_eq in Hxy. rewrite Hxy in H. exfalso. apply H. reflexivity.
+    + reflexivity.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, standard (eqb_list) 
@@ -1409,15 +1571,51 @@ Proof.
     definition is correct, prove the lemma [eqb_list_true_iff]. *)
 
 Fixpoint eqb_list {A : Type} (eqb : A -> A -> bool)
-                  (l1 l2 : list A) : bool
-  (* REPLACE THIS LINE WITH ":= _your_definition_ ." *). Admitted.
+                  (l1 l2 : list A) : bool :=
+  match l1 with
+  | nil =>
+    match l2 with
+    | nil => true
+    | h :: t => false
+    end
+  | h1 :: t1 =>
+    match l2 with
+    | nil => false
+    | h2 :: t2 =>
+      match eqb h1 h2 with
+      | true => eqb_list eqb t1 t2
+      | false => false
+      end
+    end
+  end.
 
 Theorem eqb_list_true_iff :
   forall A (eqb : A -> A -> bool),
     (forall a1 a2, eqb a1 a2 = true <-> a1 = a2) ->
     forall l1 l2, eqb_list eqb l1 l2 = true <-> l1 = l2.
 Proof.
-(* FILL IN HERE *) Admitted.
+  intros A eqb H. induction l1, l2.
+  - simpl. split. 
+    + intro e; reflexivity.
+    + intro e; reflexivity.
+  - simpl. split.
+    + intro e; discriminate e.
+    + intro e; discriminate e.
+  - simpl. split.
+    + intro e; discriminate e.
+    + intro e; discriminate e.
+  - simpl. destruct (eqb x x0) eqn: e.
+    rewrite H in e. rewrite e. split.
+    + intro tr. rewrite IHl1 in tr. rewrite tr. reflexivity.
+    + intro eq. rewrite IHl1. injection eq. intro Hl; apply Hl.
+    + split. 
+      * intro eq; discriminate eq.
+      * intro eq. exfalso. injection eq. intros _ xx.
+        rewrite xx in e. simpl in e.
+        assert (H2: eqb x0 x0 = true).
+        { apply H. reflexivity. }
+        rewrite H2 in e. discriminate e.
+Qed.
 
 (** [] *)
 
@@ -1438,7 +1636,20 @@ Fixpoint forallb {X : Type} (test : X -> bool) (l : list X) : bool :=
 Theorem forallb_true_iff : forall X test (l : list X),
    forallb test l = true <-> All (fun x => test x = true) l.
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros X test l.
+  induction l.
+  - simpl. split.
+    + intro e; apply I.
+    + intro e; reflexivity.
+  - simpl. split.
+    + intro H. rewrite andb_true_iff in H. destruct H as [H1 H2].
+      split.
+      * apply H1.
+      * apply IHl. apply H2.
+    + intros [H1 H2]. rewrite andb_true_iff. split.
+      * apply H1.
+      * rewrite IHl. apply H2.
+Qed.
 
 (** (Ungraded thought question) Are there any important properties of
     the function [forallb] which are not captured by this
@@ -1584,7 +1795,13 @@ Theorem excluded_middle_irrefutable: forall (P:Prop),
   ~ ~ (P \/ ~ P).
 Proof.
   unfold not. intros P H.
-  (* FILL IN HERE *) Admitted.
+  apply H.
+  right.
+  intros.
+  apply H.
+  left.
+  apply H0.
+Qed.
 (** [] *)
 
 (** **** Exercise: 3 stars, advanced (not_exists_dist) 
@@ -1605,7 +1822,14 @@ Theorem not_exists_dist :
   forall (X:Type) (P : X -> Prop),
     ~ (exists x, ~ P x) -> (forall x, P x).
 Proof.
-  (* FILL IN HERE *) Admitted.
+  intros.
+  unfold excluded_middle in H.
+  assert (H1: P x \/ ~ P x).
+  { apply H. }
+  destruct H1.
+  - apply H1.
+  - destruct H0. exists x. apply H1.
+Qed.
 (** [] *)
 
 (** **** Exercise: 5 stars, standard, optional (classical_axioms) 
