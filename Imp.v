@@ -238,7 +238,7 @@ Proof.
     all (rather than failing). *)
 
 Theorem silly1 : forall ae, aeval ae = aeval ae.
-Proof. try reflexivity. (* This just does [reflexivity]. *) Qed.
+Proof. reflexivity. (* This just does [reflexivity]. *) Qed.
 
 Theorem silly2 : forall (P : Prop), P -> P.
 Proof.
